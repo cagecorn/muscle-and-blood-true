@@ -5,6 +5,10 @@ import { MainMenu } from './scenes/MainMenu';
 import { Preloader } from './scenes/Preloader';
 import { AUTO, Game } from 'phaser';
 
+//  Newly added game scenes.
+import { WorldMap } from './scenes/WorldMap';
+import { BattleScene } from './scenes/BattleScene';
+
 //  Find out more information about the Game Config at:
 //  https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
 const config = {
@@ -22,7 +26,10 @@ const config = {
         Preloader,
         MainMenu,
         MainGame,
-        GameOver
+        GameOver,
+        //  Enable exploration and battles via the new scenes.
+        WorldMap,
+        BattleScene
     ]
 };
 
