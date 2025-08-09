@@ -15,15 +15,16 @@ export class WorldMap extends Scene
 
     create ()
     {
-        //  Add the world map background to the scene.
-        //  this.add.image(0, 0, 'world-map-background').setOrigin(0);
+        //  실제 월드맵 배경을 화면에 표시합니다.
+        this.add.image(0, 0, 'world-map-background').setOrigin(0);
 
-        this.add.text(512, 384, '\uC5EC\uAE30\uB294 \uC6D4\uB4DC\uB9F5\uC785\uB2C8\uB2E4.', {
+        //  전투로 들어가는 방법을 안내하는 텍스트를 추가합니다.
+        this.add.text(512, 700, '\uC774\uB3D9 \uD0A4\uC785\uB2C8\uB2E4. B \uD0A4\uB85C \uC804\uD22C\uB97C \uC2DC\uC791\uD558\uC138\uC694.', {
             fontFamily: 'Arial Black',
-            fontSize: 48,
+            fontSize: 32,
             color: '#ffffff',
             stroke: '#000000',
-            strokeThickness: 8,
+            strokeThickness: 6,
             align: 'center'
         }).setOrigin(0.5);
 
