@@ -1,4 +1,5 @@
-import { Scene } from 'phaser';
+// Load Phaser's Scene from a CDN for better portability.
+import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
 
 export class WorldMap extends Scene
 {
