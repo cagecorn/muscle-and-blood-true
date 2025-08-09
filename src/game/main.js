@@ -1,13 +1,13 @@
-import { Boot } from './scenes/Boot';
-import { Game as MainGame } from './scenes/Game';
-import { GameOver } from './scenes/GameOver';
-import { MainMenu } from './scenes/MainMenu';
-import { Preloader } from './scenes/Preloader';
+import { Boot } from './scenes/Boot.js';
+import { Game as MainGame } from './scenes/Game.js';
+import { GameOver } from './scenes/GameOver.js';
+import { MainMenu } from './scenes/MainMenu.js';
+import { Preloader } from './scenes/Preloader.js';
 import { AUTO, Game } from 'phaser';
 
 //  Newly added game scenes.
-import { WorldMap } from './scenes/WorldMap';
-import { BattleScene } from './scenes/BattleScene';
+import { WorldMap } from './scenes/WorldMap.js';
+import { BattleScene } from './scenes/BattleScene.js';
 
 //  Find out more information about the Game Config at:
 //  https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
@@ -40,3 +40,4 @@ const StartGame = (parent) => {
 }
 
 export default StartGame;
+
