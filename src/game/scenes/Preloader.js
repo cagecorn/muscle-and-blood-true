@@ -1,4 +1,5 @@
-import { Scene } from 'phaser';
+// Use the CDN version of Phaser to avoid module resolution issues.
+import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
 
 export class Preloader extends Scene
 {

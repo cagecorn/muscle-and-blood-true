@@ -1,4 +1,5 @@
-import { Scene } from 'phaser';
+// Reference Phaser via CDN so this scene can load without tooling.
+import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
 import { PLAYER } from '../../data/units.js'; // 우리가 만든 유닛 데이터 불러오기
 
 export class BattleScene extends Scene {
