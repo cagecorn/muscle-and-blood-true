@@ -1,7 +1,9 @@
 import { Physics } from 'phaser';
+import { Nameplate } from './Nameplate.js'; // Nameplate 클래스 불러오기
 
 export class Unit extends Physics.Arcade.Sprite {
-    constructor(scene, x, y, unitData) {
+    // constructor의 인자로 name을 추가합니다.
+    constructor(scene, x, y, unitData, name) {
         // 부모 클래스(Sprite) 생성자 호출
         super(scene, x, y, unitData.key);
 
@@ -12,6 +14,9 @@ export class Unit extends Physics.Arcade.Sprite {
         // 2. 유닛 데이터와 스탯 설정
         this.stats = { ...unitData }; // 원본 데이터를 복사하여 사용
         this.lastAttackTime = 0; // 마지막 공격 시간
+
+        // --- 이름표 생성 코드 추가 ---
+        this.nameplate = new Nameplate(scene, this, name);
 
         // 3. 체력바 생성 (VFX + 바인딩)
         this.healthBar = scene.add.graphics();
@@ -38,7 +43,7 @@ export class Unit extends Physics.Arcade.Sprite {
         this.stats.hp -= damage;
         if (this.stats.hp < 0) this.stats.hp = 0;
 
-        console.log(`${this.stats.name}이(가) ${damage}의 데미지를 입었습니다. 남은 체력: ${this.stats.hp}`);
+        console.log(`${this.nameplate.text}이(가) ${damage}의 데미지를 입었습니다. 남은 체력: ${this.stats.hp}`);
         this.updateHealthBar();
 
         // 5. 피격 시 붉은색 점멸 효과 (VFX)
@@ -53,6 +58,18 @@ export class Unit extends Physics.Arcade.Sprite {
         super.preUpdate(time, delta);
         // 체력바가 유닛을 따라다니도록 위치를 계속 업데이트합니다 (바인딩)
         this.healthBar.setPosition(this.x, this.y);
+
+        // --- 이름표 위치 업데이트 코드 추가 ---
+        if (this.nameplate) {
+            this.nameplate.update();
+        }
+    }
+
+    // --- 유닛 파괴 시 관련 객체 모두 제거하는 함수 추가 ---
+    destroy(fromScene) {
+        if (this.nameplate) this.nameplate.destroy();
+        this.healthBar.destroy();
+        super.destroy(fromScene);
     }
 }
 
