@@ -1,5 +1,4 @@
-// Use the CDN version of Phaser to avoid module resolution issues.
-import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
+import { Scene } from 'phaser';
 
 export class Preloader extends Scene
 {
@@ -38,7 +37,7 @@ export class Preloader extends Scene
         // 월드맵과 전투씬 배경, 플레이어 이미지를 불러옵니다.
         this.load.image('world-map-background', 'images/territory/cursed-forest.png');
         this.load.image('battle-background', 'images/battle/battle-stage-arena.png');
-        this.load.image('player', 'images/unit/warrior.png'); // 'player'라는 키로 전사 이미지를 불러옵니다.
+        this.load.image('unit_warrior', 'images/unit/warrior.png');
     }
 
     create ()

@@ -1,5 +1,4 @@
-// Load Phaser directly from a CDN so the game can run without a bundler.
-import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
+import { Scene } from 'phaser';
 
 export class Boot extends Scene
 {

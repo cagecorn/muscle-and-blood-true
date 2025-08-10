@@ -1,5 +1,4 @@
-// Use Phaser from a CDN so the project can run in the browser without bundling.
-import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
+import { Scene } from 'phaser';
 
 export class MainMenu extends Scene
 {

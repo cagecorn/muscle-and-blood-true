@@ -1,5 +1,4 @@
-// Pull Scene from Phaser via CDN to keep the module self-contained.
-import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
+import { Scene } from 'phaser';
 
 export class GameOver extends Scene
 {
