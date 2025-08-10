@@ -3,7 +3,7 @@ import { Game as MainGame } from './scenes/Game.js';
 import { GameOver } from './scenes/GameOver.js';
 import { MainMenu } from './scenes/MainMenu.js';
 import { Preloader } from './scenes/Preloader.js';
-import * as Phaser from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
+import Phaser from 'phaser';
 
 const { AUTO, Game } = Phaser;
 

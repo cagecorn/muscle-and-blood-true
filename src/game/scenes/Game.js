@@ -1,5 +1,4 @@
-// Import Phaser's Scene from a CDN so this module works standalone.
-import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
+import { Scene } from 'phaser';
 
 export class Game extends Scene
 {

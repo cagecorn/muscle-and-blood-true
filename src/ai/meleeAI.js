@@ -1,4 +1,4 @@
-import * as Phaser from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
+import Phaser from 'phaser';
 
 // 행동 트리의 기본 노드 상태
 const NodeStatus = {
@@ -57,7 +57,7 @@ class MoveToPlayer extends BehaviorNode {
     execute(owner, target) {
         // 물리 엔진을 사용하여 target(플레이어) 방향으로 owner(적)를 이동시킴
         // owner.scene은 현재 씬(BattleScene)에 접근하기 위함입니다.
-        owner.scene.physics.moveToObject(owner, target, owner.speed);
+        owner.scene.physics.moveToObject(owner, target, owner.stats.speed);
         return NodeStatus.SUCCESS;
     }
 }
