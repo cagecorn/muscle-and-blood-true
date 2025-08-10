@@ -32,6 +32,8 @@ This template has been updated for:
 
 After cloning the repo, run `npm install` from your project directory. Then, you can start the local development server by running `npm run dev`.
 
+If you just want to experiment without starting the dev server, you can open `index.html` directly in a browser. An import map is included so the `phaser` module resolves from `node_modules` when loaded this way.
+
 The local development server runs on `http://localhost:8080` by default. Please see the Vite documentation if you wish to change this, or add SSL support.
 
 Once the server is running you can edit any of the files in the `src` folder. Vite will automatically recompile your code and then reload the browser.
