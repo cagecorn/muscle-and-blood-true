@@ -16,8 +16,9 @@ export class BattleScene extends Scene {
         this.add.image(512, 384, 'battle-background');
 
         // Unit 클래스를 사용하여 플레이어와 적을 생성합니다.
-        this.player = new Unit(this, 200, 384, UNITS.WARRIOR);
-        this.enemy = new Unit(this, 824, 384, UNITS.WARRIOR);
+        // 각 유닛에게 이름을 부여하여 Nameplate에 표시합니다.
+        this.player = new Unit(this, 200, 384, UNITS.WARRIOR, '지휘관');
+        this.enemy = new Unit(this, 824, 384, UNITS.WARRIOR, '적 지휘관');
         this.enemy.setFlipX(true);
 
         // AI 설정
