@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import * as Phaser from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
 
 // 행동 트리의 기본 노드 상태
 const NodeStatus = {

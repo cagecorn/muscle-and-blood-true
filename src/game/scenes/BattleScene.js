@@ -1,4 +1,4 @@
-import { Scene } from 'phaser';
+import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
 import { UNITS } from '../../data/units.js';
 import { MeleeAI } from '../../ai/meleeAI.js';
 
