@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import * as Phaser from 'phaser';
 
 // 행동 트리의 기본 노드 상태
 const NodeStatus = {
