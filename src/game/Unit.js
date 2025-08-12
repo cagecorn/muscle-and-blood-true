@@ -1,75 +1,71 @@
 import { Physics } from 'phaser';
-import { Nameplate } from './Nameplate.js'; // Nameplate 클래스 불러오기
+import { Nameplate } from './Nameplate.js';
 
 export class Unit extends Physics.Arcade.Sprite {
-    // constructor의 인자로 name을 추가합니다.
-    constructor(scene, x, y, unitData, name) {
-        // 부모 클래스(Sprite) 생성자 호출
-        super(scene, x, y, unitData.key);
+    constructor(scene, gridX, gridY, unitData, name) {
+        // 그리드 좌표를 실제 화면 좌표로 변환하여 생성
+        const worldPos = scene.grid.getWorldPosition(gridX, gridY);
+        super(scene, worldPos.x, worldPos.y, unitData.key);
+        
+        // --- 유닛의 그리드 위치 저장 ---
+        this.gridPosition = { x: gridX, y: gridY };
 
-        // 1. 씬에 물리 객체로 추가
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        // 2. 유닛 데이터와 스탯 설정
-        this.stats = { ...unitData }; // 원본 데이터를 복사하여 사용
-        this.lastAttackTime = 0; // 마지막 공격 시간
-
-        // --- 이름표 생성 코드 추가 ---
+        this.stats = { ...unitData };
         this.nameplate = new Nameplate(scene, this, name);
-
-        // 3. 체력바 생성 (VFX + 바인딩)
         this.healthBar = scene.add.graphics();
-        this.updateHealthBar(); // 체력바 초기화
-
-        // 4. 레이어 설정
+        this.updateHealthBar();
+        
         this.setDepth(1);
         this.healthBar.setDepth(2);
+        this.nameplate.renderTexture.setDepth(3);
     }
 
-    // 체력이 변할 때마다 체력바를 다시 그리는 함수
-    updateHealthBar() {
-        this.healthBar.clear();
-        // 체력바 배경
-        this.healthBar.fillStyle(0x000000, 0.5);
-        this.healthBar.fillRect(-25, -40, 50, 8);
-        // 실제 체력
-        this.healthBar.fillStyle(0x00ff00, 1);
-        this.healthBar.fillRect(-25, -40, 50 * (this.stats.hp / 100), 8);
+    // 유닛이 행동을 실행하는 함수
+    executeAction(action) {
+        return new Promise(resolve => {
+            if (action.type === 'move') {
+                this.moveToTile(action.targetPosition.x, action.targetPosition.y, resolve);
+            }
+            // 나중에 'attack' 등 다른 행동 타입 추가 가능
+        });
     }
+    
+    // 목표 타일까지 부드럽게 이동하는 함수 (애니메이션)
+    moveToTile(gridX, gridY, onComplete) {
+        this.gridPosition = { x: gridX, y: gridY };
+        const targetPos = this.scene.grid.getWorldPosition(gridX, gridY);
 
-    // 데미지를 받는 함수
-    takeDamage(damage) {
-        this.stats.hp -= damage;
-        if (this.stats.hp < 0) this.stats.hp = 0;
-
-        console.log(`${this.nameplate.text}이(가) ${damage}의 데미지를 입었습니다. 남은 체력: ${this.stats.hp}`);
-        this.updateHealthBar();
-
-        // 5. 피격 시 붉은색 점멸 효과 (VFX)
-        this.setTint(0xff0000);
-        this.scene.time.delayedCall(150, () => {
-            this.clearTint();
+        // Phaser의 Tween 기능을 사용하여 애니메이션 생성
+        this.scene.tweens.add({
+            targets: this,
+            x: targetPos.x,
+            y: targetPos.y,
+            duration: 200, // 0.2초 동안 이동
+            ease: 'Power2',
+            onComplete: () => {
+                if (onComplete) {
+                    onComplete(); // 애니메이션이 끝나면 Promise를 resolve
+                }
+            }
         });
     }
 
-    // preUpdate는 씬의 update가 실행되기 전에 매 프레임 자동으로 실행됩니다.
+    // preUpdate에서 이름표, 체력바 위치 업데이트는 그대로 유지
     preUpdate(time, delta) {
         super.preUpdate(time, delta);
-        // 체력바가 유닛을 따라다니도록 위치를 계속 업데이트합니다 (바인딩)
-        this.healthBar.setPosition(this.x, this.y);
-
-        // --- 이름표 위치 업데이트 코드 추가 ---
+        const interpolatedPos = this.getCenter(); // Tween 중인 현재 위치를 가져옴
+        this.healthBar.setPosition(interpolatedPos.x, interpolatedPos.y);
         if (this.nameplate) {
-            this.nameplate.update();
+            this.nameplate.renderTexture.setPosition(interpolatedPos.x, interpolatedPos.y - 55);
         }
     }
-
-    // --- 유닛 파괴 시 관련 객체 모두 제거하는 함수 추가 ---
-    destroy(fromScene) {
-        if (this.nameplate) this.nameplate.destroy();
-        this.healthBar.destroy();
-        super.destroy(fromScene);
-    }
+    
+    // 나머지 함수들 (takeDamage, destroy 등)은 수정 없이 그대로 사용 가능합니다.
+    updateHealthBar() { this.healthBar.clear(); this.healthBar.fillStyle(0x000000, 0.5); this.healthBar.fillRect(-25, -40, 50, 8); this.healthBar.fillStyle(0x00ff00, 1); this.healthBar.fillRect(-25, -40, 50 * (this.stats.hp / 100), 8); }
+    takeDamage(damage) { this.stats.hp -= damage; if (this.stats.hp < 0) this.stats.hp = 0; console.log(`${this.nameplate.text} ${damage} 데미지, 체력: ${this.stats.hp}`); this.updateHealthBar(); this.setTint(0xff0000); this.scene.time.delayedCall(150, () => { this.clearTint(); }); }
+    destroy(fromScene) { if (this.nameplate) this.nameplate.destroy(); this.healthBar.destroy(); super.destroy(fromScene); }
 }
 
