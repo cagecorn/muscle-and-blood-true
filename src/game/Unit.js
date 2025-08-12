@@ -1,5 +1,6 @@
 import { Physics } from 'phaser';
 import { Nameplate } from './Nameplate.js';
+import { SizingManager } from '../engine/SizingManager.js';
 
 export class Unit extends Physics.Arcade.Sprite {
     constructor(scene, gridX, gridY, unitData, name) {
@@ -53,19 +54,53 @@ export class Unit extends Physics.Arcade.Sprite {
         });
     }
 
-    // preUpdate에서 이름표, 체력바 위치 업데이트는 그대로 유지
+    // preUpdate에서 이름표, 체력바 위치 업데이트
     preUpdate(time, delta) {
         super.preUpdate(time, delta);
         const interpolatedPos = this.getCenter(); // Tween 중인 현재 위치를 가져옴
-        this.healthBar.setPosition(interpolatedPos.x, interpolatedPos.y);
+        // SizingManager에서 Y 오프셋 가져오기
+        this.healthBar.setPosition(
+            interpolatedPos.x,
+            interpolatedPos.y + SizingManager.HEALTHBAR_Y_OFFSET
+        );
         if (this.nameplate) {
-            this.nameplate.renderTexture.setPosition(interpolatedPos.x, interpolatedPos.y - 55);
+            this.nameplate.update(); // Nameplate가 스스로 위치를 업데이트하도록 둡니다.
         }
     }
-    
-    // 나머지 함수들 (takeDamage, destroy 등)은 수정 없이 그대로 사용 가능합니다.
-    updateHealthBar() { this.healthBar.clear(); this.healthBar.fillStyle(0x000000, 0.5); this.healthBar.fillRect(-25, -40, 50, 8); this.healthBar.fillStyle(0x00ff00, 1); this.healthBar.fillRect(-25, -40, 50 * (this.stats.hp / 100), 8); }
-    takeDamage(damage) { this.stats.hp -= damage; if (this.stats.hp < 0) this.stats.hp = 0; console.log(`${this.nameplate.text} ${damage} 데미지, 체력: ${this.stats.hp}`); this.updateHealthBar(); this.setTint(0xff0000); this.scene.time.delayedCall(150, () => { this.clearTint(); }); }
-    destroy(fromScene) { if (this.nameplate) this.nameplate.destroy(); this.healthBar.destroy(); super.destroy(fromScene); }
+
+    updateHealthBar() {
+        const hbWidth = SizingManager.HEALTHBAR_WIDTH;
+        const hbHeight = SizingManager.HEALTHBAR_HEIGHT;
+
+        this.healthBar.clear();
+        this.healthBar.fillStyle(0x000000, 0.5);
+        this.healthBar.fillRect(-hbWidth / 2, 0, hbWidth, hbHeight);
+        this.healthBar.fillStyle(0x00ff00, 1);
+        this.healthBar.fillRect(
+            -hbWidth / 2,
+            0,
+            hbWidth * (this.stats.hp / 100),
+            hbHeight
+        );
+    }
+
+    takeDamage(damage) {
+        this.stats.hp -= damage;
+        if (this.stats.hp < 0) {
+            this.stats.hp = 0;
+        }
+        console.log(`${this.nameplate.text} ${damage} 데미지, 체력: ${this.stats.hp}`);
+        this.updateHealthBar();
+        this.setTint(0xff0000);
+        this.scene.time.delayedCall(150, () => {
+            this.clearTint();
+        });
+    }
+
+    destroy(fromScene) {
+        if (this.nameplate) this.nameplate.destroy();
+        this.healthBar.destroy();
+        super.destroy(fromScene);
+    }
 }
 
