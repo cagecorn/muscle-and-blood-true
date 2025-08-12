@@ -1,4 +1,5 @@
 import { GameObjects, Scene } from 'phaser';
+import { SizingManager } from '../engine/SizingManager.js';
 
 // 유닛의 이름표를 관리하는 클래스
 export class Nameplate {
@@ -13,10 +14,10 @@ export class Nameplate {
         this.text = text;
 
         // 1. 고해상도 텍스트 생성 (화면에는 아직 보이지 않음)
-        // 폰트 크기를 2배(32px)로 설정하여 선명도를 높입니다.
+        // SizingManager에서 폰트 크기를 가져와 선명도를 유지합니다.
         const tempText = scene.add.text(0, 0, this.text, {
             fontFamily: 'Arial Black',
-            fontSize: '32px',
+            fontSize: `${SizingManager.NAMEPLATE_FONT_SIZE}px`,
             color: '#ffffff',
             stroke: '#000000',
             strokeThickness: 6
@@ -39,7 +40,7 @@ export class Nameplate {
 
     // 이름표의 위치를 주인(유닛)을 따라가도록 업데이트
     update() {
-        this.renderTexture.setPosition(this.owner.x, this.owner.y - 55); // 유닛 머리 위로 위치 조정
+        this.renderTexture.setPosition(this.owner.x, this.owner.y + SizingManager.NAMEPLATE_Y_OFFSET);
     }
 
     // 유닛이 파괴될 때 이름표도 함께 파괴
