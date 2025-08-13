@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+import { MapManager } from '../../engine/MapManager.js'; // MapManager를 불러옵니다.
 
 export class Preloader extends Scene
 {
@@ -36,8 +37,11 @@ export class Preloader extends Scene
 
         // 월드맵과 전투씬 배경, 플레이어 이미지를 불러옵니다.
         this.load.image('world-map-background', 'images/territory/cursed-forest.png');
-        this.load.image('battle-background', 'images/battle/battle-stage-arena.png');
+        // this.load.image('battle-background', 'images/battle/battle-stage-arena.png'); // MapManager가 배경을 그리므로 주석 처리
         this.load.image('unit_warrior', 'images/unit/warrior.png');
+
+        // MapManager를 사용하여 맵 타일 에셋을 로드합니다.
+        MapManager.preload(this);
     }
 
     create ()

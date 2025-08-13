@@ -1,9 +1,9 @@
 // 게임의 모든 크기 및 비율 관련 상수를 정의하는 매니저
 export const SizingManager = {
     // 그리드 설정
-    GRID_WIDTH: 16,      // 그리드의 가로 타일 수
-    GRID_HEIGHT: 9,      // 그리드의 세로 타일 수
-    TILE_SIZE: 512,       // 각 타일의 한 변 크기 (픽셀)
+    GRID_WIDTH: 30,      // 그리드의 가로 타일 수
+    GRID_HEIGHT: 30,     // 그리드의 세로 타일 수
+    TILE_SIZE: 128,      // 각 타일의 한 변 크기 (픽셀)
 
     // UI 및 기타 요소
     NAMEPLATE_FONT_SIZE: 32, // 이름표 폰트 크기 (고해상도 기준)
