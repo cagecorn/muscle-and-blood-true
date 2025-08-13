@@ -34,6 +34,28 @@ export class BattleScene extends Scene {
         // 3. 입력 및 기타 설정
         this.input.keyboard.on('keydown', event => this.handleKeyPress(event));
         this.input.keyboard.on('keydown-M', () => { this.scene.start('WorldMap'); });
+
+        // --- 카메라 드래그 및 확대/축소 기능 추가 ---
+        const worldWidth = this.grid.width * this.grid.tileSize;
+        const worldHeight = this.grid.height * this.grid.tileSize;
+        this.cameras.main.setBounds(this.grid.offsetX, this.grid.offsetY, worldWidth, worldHeight);
+
+        this.input.on('pointermove', (pointer) => {
+            if (!pointer.isDown) {
+                return;
+            }
+
+            this.cameras.main.scrollX -= (pointer.x - pointer.prevPosition.x) / this.cameras.main.zoom;
+            this.cameras.main.scrollY -= (pointer.y - pointer.prevPosition.y) / this.cameras.main.zoom;
+        });
+
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            if (deltaY > 0) {
+                this.cameras.main.zoom *= 0.9;
+            } else if (deltaY < 0) {
+                this.cameras.main.zoom *= 1.1;
+            }
+        });
     }
 
     handleKeyPress(event) {
