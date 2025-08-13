@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { SizingManager } from './SizingManager.js';
 
 // 맵 타일의 생성 및 무작위 배치를 담당하는 매니저
@@ -11,7 +12,7 @@ export class MapManager {
     // 맵 타일 에셋을 불러오는 함수
     static preload(scene) {
         for (let i = 1; i <= 15; i++) {
-            scene.load.image(`mab-tile-${i}`, `assets/images/world-mab/mab-tile-${i}.png`);
+            scene.load.image(`mab-tile-${i}`, `images/world-mab/mab-tile-${i}.png`);
         }
     }
 
