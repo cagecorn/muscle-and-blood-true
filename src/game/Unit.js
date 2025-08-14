@@ -14,6 +14,11 @@ export class Unit extends Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
+        // ✨ --- 이 부분을 추가하세요! --- ✨
+        // SizingManager에서 정의한 TILE_SIZE에 맞게 유닛의 표시 크기를 조절합니다.
+        this.setDisplaySize(SizingManager.TILE_SIZE, SizingManager.TILE_SIZE);
+        // ✨ --------------------------- ✨
+
         this.stats = { ...unitData };
         this.nameplate = new Nameplate(scene, this, name);
         this.healthBar = scene.add.graphics();
