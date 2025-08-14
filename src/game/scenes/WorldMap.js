@@ -1,25 +1,31 @@
 import { Scene } from 'phaser';
+import { DungeonManager } from '../../engine/DungeonManager.js';
+import { SizingManager } from '../../engine/SizingManager.js';
 
 export class WorldMap extends Scene
 {
     constructor ()
     {
         super('WorldMap');
-    }
 
-    preload ()
-    {
-        //  Preload assets required for the world map scene here.
-        //  Example: this.load.image('world-map-background', 'assets/images/territory/cursed-forest.png');
+        this.dungeonManager = null;
     }
 
     create ()
     {
-        //  실제 월드맵 배경을 화면에 표시합니다.
-        this.add.image(0, 0, 'world-map-background').setOrigin(0);
+        const TILE_SIZE = SizingManager.TILE_SIZE; // 타일 크기
+        const DUNGEON_WIDTH = 50; // 던전의 가로 타일 수
+        const DUNGEON_HEIGHT = 50; // 던전의 세로 타일 수
 
-        //  전투로 들어가는 방법을 안내하는 텍스트를 추가합니다.
-        this.add.text(512, 700, '\uC774\uB3D9 \uD0A4\uC785\uB2C8\uB2E4. B \uD0A4\uB85C \uC804\uD22C\uB97C \uC2DC\uC791\uD558\uC138\uC694.', {
+        //  DungeonManager 인스턴스 생성
+        this.dungeonManager = new DungeonManager(this, DUNGEON_WIDTH, DUNGEON_HEIGHT, 'wall-tile');
+
+        //  던전 생성 및 렌더링
+        this.dungeonManager.generateDungeon();
+        this.dungeonManager.renderDungeon(TILE_SIZE);
+        
+        //  안내 텍스트 추가
+        this.add.text(this.scale.width / 2, this.scale.height - 50, '던전이 생성되었습니다. B 키로 전투를 시작하세요.', {
             fontFamily: 'Arial Black',
             fontSize: 32,
             color: '#ffffff',
@@ -28,8 +34,8 @@ export class WorldMap extends Scene
             align: 'center'
         }).setOrigin(0.5);
 
-        //  Enable dragging the camera around the map.
-        this.cameras.main.setBounds(0, 0, 1920, 1080);
+        //  카메라 설정
+        this.cameras.main.setBounds(0, 0, DUNGEON_WIDTH * TILE_SIZE, DUNGEON_HEIGHT * TILE_SIZE);
         this.input.on('pointermove', (pointer) => {
             if (!pointer.isDown)
             {
@@ -39,15 +45,19 @@ export class WorldMap extends Scene
             this.cameras.main.scrollX -= (pointer.x - pointer.prevPosition.x) / this.cameras.main.zoom;
             this.cameras.main.scrollY -= (pointer.y - pointer.prevPosition.y) / this.cameras.main.zoom;
         });
+        
+        // 마우스 휠로 줌 기능 추가
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            if (deltaY > 0) {
+                this.cameras.main.zoom = Math.max(0.5, this.cameras.main.zoom * 0.9);
+            } else if (deltaY < 0) {
+                this.cameras.main.zoom = Math.min(3, this.cameras.main.zoom * 1.1);
+            }
+        });
 
-        //  Pressing the 'B' key switches to the battle scene.
+        //  'B' 키를 눌러 전투 씬으로 전환
         this.input.keyboard.on('keydown-B', () => {
             this.scene.start('BattleScene');
         });
-    }
-
-    update (time, delta)
-    {
-        //  Handle world map logic that needs to run each frame here.
     }
 }
