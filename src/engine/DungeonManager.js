@@ -23,11 +23,12 @@ class Room {
 }
 
 export class DungeonManager {
-    constructor(scene, width, height, wallTileKey) {
+    constructor(scene, width, height, wallTileKey, floorTileKey) {
         this.scene = scene;
         this.width = width;
         this.height = height;
         this.wallTileKey = wallTileKey;
+        this.floorTileKey = floorTileKey;
         this.tiles = []; // 맵의 타일 데이터를 저장할 2D 배열
         this.rooms = [];
     }
@@ -169,10 +170,20 @@ export class DungeonManager {
     renderDungeon(tileSize) {
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
-                if (this.tiles[x][y] === 1) { // 벽일 경우
+                const tile = this.tiles[x][y];
+                if (tile === 1) {
                     this.scene.add.image(x * tileSize, y * tileSize, this.wallTileKey).setOrigin(0);
+                } else if (tile === 0) {
+                    this.scene.add.image(x * tileSize, y * tileSize, this.floorTileKey).setOrigin(0);
                 }
             }
         }
+    }
+
+    getTileAt(x, y) {
+        if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+            return this.tiles[x][y];
+        }
+        return 1; // 맵 밖은 벽으로 처리
     }
 }
