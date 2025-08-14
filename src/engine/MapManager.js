@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import * as Phaser from 'phaser';
 import { SizingManager } from './SizingManager.js';
 
 // 맵 타일의 생성 및 무작위 배치를 담당하는 매니저
