@@ -1,3 +1,4 @@
+import * as Phaser from 'phaser';
 import { Scene } from 'phaser';
 import { DungeonManager } from '../../engine/DungeonManager.js';
 import { SizingManager } from '../../engine/SizingManager.js';
@@ -11,6 +12,9 @@ export class WorldMap extends Scene
         this.commander = null;
         this.cursors = null;
         this.tileSize = SizingManager.TILE_SIZE;
+        this.isMoving = false;
+        this.targetX = null;
+        this.targetY = null;
     }
 
     create ()
@@ -37,7 +41,9 @@ export class WorldMap extends Scene
         }
 
         if (startX !== -1 && startY !== -1) {
-            this.commander = this.add.sprite(startX, startY, 'unit_warrior').setOrigin(0.5);
+            this.commander = this.physics.add.sprite(startX, startY, 'unit_warrior')
+                .setOrigin(0.5)
+                .setDisplaySize(80, 80);
             this.cameras.main.startFollow(this.commander);
         } else {
             console.warn('시작 지점을 찾을 수 없습니다.');
@@ -83,26 +89,51 @@ export class WorldMap extends Scene
             return;
         }
 
-        const speed = this.tileSize * delta / 1000;
-        const prevX = this.commander.x;
-        const prevY = this.commander.y;
+        if (this.isMoving) {
+            const distance = Phaser.Math.Distance.Between(
+                this.commander.x,
+                this.commander.y,
+                this.targetX,
+                this.targetY
+            );
 
-        if (this.cursors.left.isDown) {
-            this.commander.x -= speed;
-        } else if (this.cursors.right.isDown) {
-            this.commander.x += speed;
-        } else if (this.cursors.up.isDown) {
-            this.commander.y -= speed;
-        } else if (this.cursors.down.isDown) {
-            this.commander.y += speed;
+            if (distance < 5) {
+                this.isMoving = false;
+                this.commander.setPosition(this.targetX, this.targetY);
+                this.commander.body.setVelocity(0, 0);
+            } else {
+                const speed = 300;
+                this.physics.moveTo(this.commander, this.targetX, this.targetY, speed);
+            }
+
+            return;
         }
 
-        const tileX = Math.floor(this.commander.x / this.tileSize);
-        const tileY = Math.floor(this.commander.y / this.tileSize);
+        let moveX = 0;
+        let moveY = 0;
 
-        if (this.dungeonManager.getTileAt(tileX, tileY) === 1) {
-            this.commander.x = prevX;
-            this.commander.y = prevY;
+        if (this.cursors.left.isDown) {
+            moveX = -1;
+        } else if (this.cursors.right.isDown) {
+            moveX = 1;
+        } else if (this.cursors.up.isDown) {
+            moveY = -1;
+        } else if (this.cursors.down.isDown) {
+            moveY = 1;
+        }
+
+        if (moveX !== 0 || moveY !== 0) {
+            const currentTileX = Math.floor(this.commander.x / this.tileSize);
+            const currentTileY = Math.floor(this.commander.y / this.tileSize);
+
+            const nextTileX = currentTileX + moveX;
+            const nextTileY = currentTileY + moveY;
+
+            if (this.dungeonManager.getTileAt(nextTileX, nextTileY) === 0) {
+                this.isMoving = true;
+                this.targetX = nextTileX * this.tileSize + this.tileSize / 2;
+                this.targetY = nextTileY * this.tileSize + this.tileSize / 2;
+            }
         }
     }
 }
