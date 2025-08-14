@@ -35,8 +35,9 @@ export class Preloader extends Scene
 
         this.load.image('logo', 'logo.png');
 
-        // 월드맵 배경 대신 벽 타일을 로드합니다.
+        // 월드맵 타일을 로드합니다.
         this.load.image('wall-tile', 'images/world-mab/wall-tile-1.png');
+        this.load.image('floor-tile', 'images/world-mab/floor-tile-1.png');
 
         this.load.image('unit_warrior', 'images/unit/warrior.png');
 
