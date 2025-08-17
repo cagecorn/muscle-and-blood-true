@@ -44,7 +44,9 @@ export class WorldMap extends Scene
             this.commander = this.physics.add.sprite(startX, startY, 'unit_warrior')
                 .setOrigin(0.5)
                 .setDisplaySize(80, 80);
-            this.cameras.main.startFollow(this.commander);
+            // 전투 씬과 동일하게 부드러운 카메라 이동을 적용
+            this.cameras.main.startFollow(this.commander, true, 0.08, 0.08);
+            this.cameras.main.setZoom(1.5);
         } else {
             console.warn('시작 지점을 찾을 수 없습니다.');
         }
@@ -85,27 +87,7 @@ export class WorldMap extends Scene
     }
 
     update(time, delta) {
-        if (!this.commander || !this.cursors) {
-            return;
-        }
-
-        if (this.isMoving) {
-            const distance = Phaser.Math.Distance.Between(
-                this.commander.x,
-                this.commander.y,
-                this.targetX,
-                this.targetY
-            );
-
-            if (distance < 5) {
-                this.isMoving = false;
-                this.commander.setPosition(this.targetX, this.targetY);
-                this.commander.body.setVelocity(0, 0);
-            } else {
-                const speed = 300;
-                this.physics.moveTo(this.commander, this.targetX, this.targetY, speed);
-            }
-
+        if (!this.commander || !this.cursors || this.isMoving) {
             return;
         }
 
@@ -133,6 +115,19 @@ export class WorldMap extends Scene
                 this.isMoving = true;
                 this.targetX = nextTileX * this.tileSize + this.tileSize / 2;
                 this.targetY = nextTileY * this.tileSize + this.tileSize / 2;
+
+                // 전투 씬과 유사한 빠르고 자연스러운 이동을 위해 Tween 사용
+                this.tweens.add({
+                    targets: this.commander,
+                    x: this.targetX,
+                    y: this.targetY,
+                    duration: 200,
+                    ease: 'Power2',
+                    onComplete: () => {
+                        this.isMoving = false;
+                        this.commander.setPosition(this.targetX, this.targetY);
+                    }
+                });
             }
         }
     }
