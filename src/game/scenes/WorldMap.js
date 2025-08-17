@@ -1,6 +1,9 @@
 import * as Phaser from 'phaser';
 import { Scene } from 'phaser';
 import { DungeonManager } from '../../engine/DungeonManager.js';
+import { SizingManager } from '../../engine/SizingManager.js';
+import { Nameplate } from '../Nameplate.js';
+import { HealthBar } from '../HealthBar.js';
 
 export class WorldMap extends Scene
 {
@@ -14,6 +17,8 @@ export class WorldMap extends Scene
         this.isMoving = false;
         this.targetX = null;
         this.targetY = null;
+        this.nameplates = [];
+        this.healthBars = [];
     }
 
     create ()
@@ -47,15 +52,32 @@ export class WorldMap extends Scene
             // 파티를 하나의 컨테이너에 담아 단일 유닛처럼 이동하게 한다
             const party = this.add.container(startX, startY);
 
+            const baseSize = this.tileSize * SizingManager.WORLD_UNIT_SCALE;
+            const leaderSize = this.tileSize * SizingManager.WORLD_LEADER_SCALE;
+
             // 전사(선봉), 거너, 메딕 순서로 배치
             const gunner = this.add.sprite(-15, -8, 'unit_gunner')
-                .setDisplaySize(40, 40);
+                .setDisplaySize(baseSize, baseSize);
             const medic = this.add.sprite(15, -8, 'unit_medic')
-                .setDisplaySize(40, 40);
+                .setDisplaySize(baseSize, baseSize);
             const warrior = this.add.sprite(0, 8, 'unit_warrior')
-                .setDisplaySize(48, 48);
+                .setDisplaySize(leaderSize, leaderSize);
 
             party.add([gunner, medic, warrior]);
+
+            // 이름표 및 체력바 생성
+            [
+                { sprite: gunner, name: '거너' },
+                { sprite: medic, name: '메딕' },
+                { sprite: warrior, name: '워리어' }
+            ].forEach(({ sprite, name }) => {
+                const nameplate = new Nameplate(this, sprite, name);
+                const healthBar = new HealthBar(this, sprite);
+                party.add(nameplate.renderTexture);
+                party.add(healthBar.renderTexture);
+                this.nameplates.push(nameplate);
+                this.healthBars.push(healthBar);
+            });
 
             this.commander = party;
 
@@ -88,7 +110,7 @@ export class WorldMap extends Scene
 
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
             if (deltaY > 0) {
-                this.cameras.main.zoom = Math.max(0.5, this.cameras.main.zoom * 0.9);
+                this.cameras.main.zoom = Math.max(0.125, this.cameras.main.zoom * 0.9);
             } else if (deltaY < 0) {
                 this.cameras.main.zoom = Math.min(3, this.cameras.main.zoom * 1.1);
             }
@@ -102,6 +124,9 @@ export class WorldMap extends Scene
     }
 
     update(time, delta) {
+        this.nameplates.forEach(np => np.update());
+        this.healthBars.forEach(hb => hb.update());
+
         if (!this.commander || !this.cursors || this.isMoving) {
             return;
         }
