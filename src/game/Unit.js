@@ -3,27 +3,30 @@ import { Nameplate } from './Nameplate.js';
 import { SizingManager } from '../engine/SizingManager.js';
 
 export class Unit extends Physics.Arcade.Sprite {
-    constructor(scene, gridX, gridY, unitData, name) {
+    constructor(scene, gridX, gridY, unitData, name, options = {}) {
+        const { scale = 1 } = options;
+
         // 그리드 좌표를 실제 화면 좌표로 변환하여 생성
         const worldPos = scene.grid.getWorldPosition(gridX, gridY);
         super(scene, worldPos.x, worldPos.y, unitData.key);
-        
+
         // --- 유닛의 그리드 위치 저장 ---
         this.gridPosition = { x: gridX, y: gridY };
 
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        // ✨ --- 이 부분을 추가하세요! --- ✨
-        // SizingManager에서 정의한 TILE_SIZE에 맞게 유닛의 표시 크기를 조절합니다.
-        this.setDisplaySize(SizingManager.TILE_SIZE, SizingManager.TILE_SIZE);
-        // ✨ --------------------------- ✨
+        // SizingManager에서 정의한 TILE_SIZE와 스케일에 맞게 유닛의 표시 크기를 조절
+        this.setDisplaySize(
+            SizingManager.TILE_SIZE * scale,
+            SizingManager.TILE_SIZE * scale
+        );
 
         this.stats = { ...unitData };
         this.nameplate = new Nameplate(scene, this, name);
         this.healthBar = scene.add.graphics();
         this.updateHealthBar();
-        
+
         this.setDepth(1);
         this.healthBar.setDepth(2);
         this.nameplate.renderTexture.setDepth(3);
@@ -62,14 +65,16 @@ export class Unit extends Physics.Arcade.Sprite {
     // preUpdate에서 이름표, 체력바 위치 업데이트
     preUpdate(time, delta) {
         super.preUpdate(time, delta);
-        const interpolatedPos = this.getCenter(); // Tween 중인 현재 위치를 가져옴
-        // SizingManager에서 Y 오프셋 가져오기
+        const interpolatedPos = this.getCenter();
+        const topY = interpolatedPos.y - this.displayHeight / 2;
+
         this.healthBar.setPosition(
             interpolatedPos.x,
-            interpolatedPos.y + SizingManager.HEALTHBAR_Y_OFFSET
+            topY + SizingManager.HEALTHBAR_Y_OFFSET
         );
+
         if (this.nameplate) {
-            this.nameplate.update(); // Nameplate가 스스로 위치를 업데이트하도록 둡니다.
+            this.nameplate.update();
         }
     }
 

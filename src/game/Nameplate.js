@@ -40,7 +40,11 @@ export class Nameplate {
 
     // 이름표의 위치를 주인(유닛)을 따라가도록 업데이트
     update() {
-        this.renderTexture.setPosition(this.owner.x, this.owner.y + SizingManager.NAMEPLATE_Y_OFFSET);
+        const topY = this.owner.y - this.owner.displayHeight / 2;
+        this.renderTexture.setPosition(
+            this.owner.x,
+            topY + SizingManager.NAMEPLATE_Y_OFFSET
+        );
     }
 
     // 유닛이 파괴될 때 이름표도 함께 파괴
