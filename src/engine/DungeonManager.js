@@ -65,8 +65,17 @@ export class DungeonManager {
                         const dx = this.rooms[j].centerX - this.rooms[i].centerX;
                         const dy = this.rooms[j].centerY - this.rooms[i].centerY;
                         const distance = Math.sqrt(dx * dx + dy * dy);
-                        const moveX = dx / distance;
-                        const moveY = dy / distance;
+                        let moveX;
+                        let moveY;
+
+                        if (distance === 0) {
+                            const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+                            moveX = Math.cos(angle);
+                            moveY = Math.sin(angle);
+                        } else {
+                            moveX = dx / distance;
+                            moveY = dy / distance;
+                        }
 
                         this.rooms[i].x -= Math.round(moveX);
                         this.rooms[i].y -= Math.round(moveY);
