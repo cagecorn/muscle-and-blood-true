@@ -234,14 +234,21 @@ export class DungeonManager {
     }
     
     // 생성된 던전을 화면에 그리는 함수
-    renderDungeon(tileSize) {
+    renderDungeon() {
+        const wallTexture = this.scene.textures.get(this.wallTileKey).getSourceImage();
+        const tileWidth = wallTexture.width;
+        const tileHeight = wallTexture.height;
+
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
                 const tile = this.tiles[x][y];
+                const posX = x * tileWidth;
+                const posY = y * tileHeight;
+
                 if (tile === 1) {
-                    this.scene.add.image(x * tileSize, y * tileSize, this.wallTileKey).setOrigin(0);
+                    this.scene.add.image(posX, posY, this.wallTileKey).setOrigin(0);
                 } else if (tile === 0) {
-                    this.scene.add.image(x * tileSize, y * tileSize, this.floorTileKey).setOrigin(0);
+                    this.scene.add.image(posX, posY, this.floorTileKey).setOrigin(0);
                 }
             }
         }
