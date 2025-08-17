@@ -8,7 +8,9 @@ export class WorldEnemy extends WorldEntity {
         const worldX = gridX * tileSize + tileSize / 2;
         const worldY = gridY * tileSize + tileSize / 2;
         const container = scene.add.container(worldX, worldY);
-        const sprite = scene.add.sprite(0, 0, key).setDisplaySize(tileSize, tileSize);
+        const sprite = scene.add.sprite(0, 0, key)
+            .setDisplaySize(tileSize, tileSize)
+            .setFlipX(true);
         container.add(sprite);
 
         const nameplate = new Nameplate(scene, sprite, name);
