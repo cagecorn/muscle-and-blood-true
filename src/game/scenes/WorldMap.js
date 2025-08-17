@@ -41,10 +41,22 @@ export class WorldMap extends Scene
         }
 
         if (startX !== -1 && startY !== -1) {
-            this.commander = this.physics.add.sprite(startX, startY, 'unit_warrior')
-                .setOrigin(0.5)
-                .setDisplaySize(80, 80);
-            // 전투 씬과 동일하게 부드러운 카메라 이동을 적용
+            // 파티를 하나의 컨테이너에 담아 단일 유닛처럼 이동하게 한다
+            const party = this.add.container(startX, startY);
+
+            // 전사(선봉), 거너, 메딕 순서로 배치
+            const gunner = this.add.sprite(-15, -8, 'unit_gunner')
+                .setDisplaySize(40, 40);
+            const medic = this.add.sprite(15, -8, 'unit_medic')
+                .setDisplaySize(40, 40);
+            const warrior = this.add.sprite(0, 8, 'unit_warrior')
+                .setDisplaySize(48, 48);
+
+            party.add([gunner, medic, warrior]);
+
+            this.commander = party;
+
+            // 부드러운 카메라 이동 및 확대 설정
             this.cameras.main.startFollow(this.commander, true, 0.08, 0.08);
             this.cameras.main.setZoom(1.5);
         } else {
