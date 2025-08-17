@@ -1,7 +1,5 @@
-import * as Phaser from 'phaser';
 import { Scene } from 'phaser';
 import { DungeonManager } from '../../engine/DungeonManager.js';
-import { SizingManager } from '../../engine/SizingManager.js';
 import { Nameplate } from '../Nameplate.js';
 import { HealthBar } from '../HealthBar.js';
 import { WorldEntity } from '../WorldEntity.js';
@@ -53,42 +51,23 @@ export class WorldMap extends Scene
         }
 
         if (startX !== -1 && startY !== -1) {
-            // 파티를 하나의 컨테이너에 담아 단일 유닛처럼 이동하게 한다
-            const party = this.add.container(startX, startY);
+            const container = this.add.container(startX, startY);
+            const warrior = this.add.sprite(0, 0, 'unit_warrior')
+                .setDisplaySize(this.tileSize, this.tileSize);
+            container.add(warrior);
 
-            const baseSize = this.tileSize * SizingManager.WORLD_UNIT_SCALE;
-            const leaderSize = this.tileSize * SizingManager.WORLD_LEADER_SCALE;
+            const nameplate = new Nameplate(this, warrior, '워리어');
+            const healthBar = new HealthBar(this, warrior);
+            container.add(nameplate.renderTexture);
+            container.add(healthBar.renderTexture);
+            this.nameplates.push(nameplate);
+            this.healthBars.push(healthBar);
 
-            // 전사(선봉), 거너, 메딕 순서로 배치
-            const gunner = this.add.sprite(-15, -8, 'unit_gunner')
-                .setDisplaySize(baseSize, baseSize);
-            const medic = this.add.sprite(15, -8, 'unit_medic')
-                .setDisplaySize(baseSize, baseSize);
-            const warrior = this.add.sprite(0, 8, 'unit_warrior')
-                .setDisplaySize(leaderSize, leaderSize);
-
-            party.add([gunner, medic, warrior]);
-
-            // 이름표 및 체력바 생성
-            [
-                { sprite: gunner, name: '거너' },
-                { sprite: medic, name: '메딕' },
-                { sprite: warrior, name: '워리어' }
-            ].forEach(({ sprite, name }) => {
-                const nameplate = new Nameplate(this, sprite, name);
-                const healthBar = new HealthBar(this, sprite);
-                party.add(nameplate.renderTexture);
-                party.add(healthBar.renderTexture);
-                this.nameplates.push(nameplate);
-                this.healthBars.push(healthBar);
-            });
-
-            this.commander = party;
-            this.playerEntity = new WorldEntity(this, party, this.tileSize);
+            this.commander = container;
+            this.playerEntity = new WorldEntity(this, container, this.tileSize);
 
             this.spawnEnemies();
 
-            // 부드러운 카메라 이동 및 확대 설정
             this.cameras.main.startFollow(this.commander, true, 0.08, 0.08);
             this.cameras.main.setZoom(1.5);
         } else {
@@ -132,21 +111,14 @@ export class WorldMap extends Scene
 
     spawnEnemies() {
         const playerPos = this.playerEntity.getGridPosition();
-        const configs = [
-            { dx: 5, dy: 0, key: 'unit_warrior', name: '적 워리어' },
-            { dx: 5, dy: 1, key: 'unit_gunner', name: '적 거너' },
-            { dx: 5, dy: -1, key: 'unit_medic', name: '적 메딕' }
-        ];
-        configs.forEach(cfg => {
-            const x = playerPos.x + cfg.dx;
-            const y = playerPos.y + cfg.dy;
-            if (this.dungeonManager.getTileAt(x, y) === 0) {
-                const enemy = new WorldEnemy(this, x, y, cfg.key, cfg.name, this.tileSize);
-                this.enemies.push(enemy);
-                this.nameplates.push(enemy.nameplate);
-                this.healthBars.push(enemy.healthBar);
-            }
-        });
+        const x = playerPos.x + 5;
+        const y = playerPos.y;
+        if (this.dungeonManager.getTileAt(x, y) === 0) {
+            const enemy = new WorldEnemy(this, x, y, 'unit_warrior', '적 워리어', this.tileSize);
+            this.enemies.push(enemy);
+            this.nameplates.push(enemy.nameplate);
+            this.healthBars.push(enemy.healthBar);
+        }
     }
 
     processEnemyTurn() {
