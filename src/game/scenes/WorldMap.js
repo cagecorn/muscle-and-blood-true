@@ -1,7 +1,6 @@
 import * as Phaser from 'phaser';
 import { Scene } from 'phaser';
 import { DungeonManager } from '../../engine/DungeonManager.js';
-import { SizingManager } from '../../engine/SizingManager.js';
 
 export class WorldMap extends Scene
 {
@@ -11,7 +10,7 @@ export class WorldMap extends Scene
         this.dungeonManager = null;
         this.commander = null;
         this.cursors = null;
-        this.tileSize = SizingManager.TILE_SIZE;
+        this.tileSize = 0;
         this.isMoving = false;
         this.targetX = null;
         this.targetY = null;
@@ -24,7 +23,11 @@ export class WorldMap extends Scene
 
         this.dungeonManager = new DungeonManager(this, DUNGEON_WIDTH, DUNGEON_HEIGHT, 'wall-tile', 'floor-tile');
         const dungeonTiles = this.dungeonManager.generateDungeon();
-        this.dungeonManager.renderDungeon(this.tileSize);
+
+        const tileTexture = this.textures.get('floor-tile').getSourceImage();
+        this.tileSize = tileTexture.width;
+
+        this.dungeonManager.renderDungeon();
 
         let startX = -1, startY = -1;
         for (let x = 1; x < DUNGEON_WIDTH - 1; x++) {
