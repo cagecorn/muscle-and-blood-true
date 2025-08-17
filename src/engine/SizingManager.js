@@ -5,6 +5,10 @@ export const SizingManager = {
     GRID_HEIGHT: 30,     // 그리드의 세로 타일 수
     TILE_SIZE: 128,      // 각 타일의 한 변 크기 (픽셀)
 
+    // 월드맵 유닛 크기 조절
+    WORLD_UNIT_SCALE: 0.75,     // 일반 유닛이 타일 대비 차지하는 비율
+    WORLD_LEADER_SCALE: 0.9,    // 선봉 유닛이 타일 대비 차지하는 비율
+
     // UI 및 기타 요소
     NAMEPLATE_FONT_SIZE: 32, // 이름표 폰트 크기 (고해상도 기준)
     NAMEPLATE_Y_OFFSET: -55, // 유닛 머리로부터 이름표가 떨어질 거리
