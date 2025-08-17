@@ -1,7 +1,7 @@
 import { Scene } from 'phaser';
 import { UNITS } from '../../data/units.js';
 import { MeleeAI } from '../../ai/meleeAI.js';
-import { TurnManager, TurnState } from '../../engine/TurnManager.js';
+import { TurnEngine, TurnState } from '../../engine/TurnEngine.js';
 import { GridManager } from '../../engine/GridManager.js'; // 그리드 매니저 불러오기
 import { MapManager } from '../../engine/MapManager.js'; // MapManager를 불러옵니다.
 import { PartyEngine } from '../../engine/PartyEngine.js';
@@ -25,7 +25,7 @@ export class BattleScene extends Scene {
         // 1. 매니저들 생성
         this.grid = new GridManager(this);
         this.mapManager = new MapManager(this); // MapManager 인스턴스 생성
-        this.turnManager = new TurnManager(this);
+        this.turnManager = new TurnEngine(this);
 
         // MapManager를 사용하여 맵 타일을 생성합니다.
         this.mapManager.createMap();
