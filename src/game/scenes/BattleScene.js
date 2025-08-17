@@ -1,6 +1,8 @@
 import { Scene } from 'phaser';
 import { UNITS } from '../../data/units.js';
 import { MeleeAI } from '../../ai/meleeAI.js';
+import { RangedAI } from '../../ai/RangedAI.js';
+import { HealerAI } from '../../ai/HealerAI.js';
 import { TurnEngine, TurnState } from '../../engine/TurnEngine.js';
 import { GridManager } from '../../engine/GridManager.js'; // 그리드 매니저 불러오기
 import { MapManager } from '../../engine/MapManager.js'; // MapManager를 불러옵니다.
@@ -55,7 +57,13 @@ export class BattleScene extends Scene {
         );
         this.enemies = this.enemyParty;
         this.enemyParty.forEach(enemy => {
-            enemy.ai = new MeleeAI(enemy);
+            if (enemy.stats.ability === 'melee') {
+                enemy.ai = new MeleeAI(enemy);
+            } else if (enemy.stats.ability === 'ranged') {
+                enemy.ai = new RangedAI(enemy);
+            } else if (enemy.stats.ability === 'heal') {
+                enemy.ai = new HealerAI(enemy, this.enemyParty);
+            }
         });
 
         // 3. 입력 및 기타 설정

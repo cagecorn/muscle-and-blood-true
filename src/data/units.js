@@ -11,7 +11,9 @@ export const UNITS = {
         attack: 10,       // 물리 공격력
         defense: 5,       // 물리 방어력
         attackSpeed: 1000, // 1초에 한 번 공격
-        speed: 200        // 이동 속도
+        speed: 200,        // 이동 속도
+        range: 1,
+        ability: 'melee'
     },
 
     GUNNER: {
@@ -23,7 +25,9 @@ export const UNITS = {
         attack: 12,
         defense: 3,
         attackSpeed: 800,
-        speed: 220
+        speed: 220,
+        range: 3,
+        ability: 'ranged'
     },
 
     MEDIC: {
@@ -35,6 +39,8 @@ export const UNITS = {
         attack: 5,
         defense: 4,
         attackSpeed: 900,
-        speed: 210
+        speed: 210,
+        range: 2,
+        ability: 'heal'
     }
 };
