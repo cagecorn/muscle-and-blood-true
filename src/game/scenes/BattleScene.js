@@ -1,17 +1,20 @@
 import { Scene } from 'phaser';
 import { UNITS } from '../../data/units.js';
 import { MeleeAI } from '../../ai/meleeAI.js';
-import { Unit } from '../Unit.js';
 import { TurnManager, TurnState } from '../../engine/TurnManager.js';
 import { GridManager } from '../../engine/GridManager.js'; // 그리드 매니저 불러오기
 import { MapManager } from '../../engine/MapManager.js'; // MapManager를 불러옵니다.
+import { PartyEngine } from '../../engine/PartyEngine.js';
 
 export class BattleScene extends Scene {
     constructor() {
         super('BattleScene');
-        this.grid = null; 
+        this.grid = null;
         this.mapManager = null; // mapManager 속성 추가
         this.turnManager = null;
+        this.partyEngine = null;
+        this.playerParty = [];
+        this.enemyParty = [];
         this.player = null;
         this.enemies = [];
     }
@@ -30,12 +33,30 @@ export class BattleScene extends Scene {
         // 개발 편의를 위해 그리드를 화면에 표시
         this.grid.draw();
 
-        // 2. 그리드 위에 유닛 배치 (30x30에 맞게 위치 조정)
-        this.player = new Unit(this, 5, 15, UNITS.WARRIOR, '지휘관');
-        const enemy = new Unit(this, 24, 15, UNITS.WARRIOR, '적 지휘관');
-        enemy.setFlipX(true);
-        this.enemies.push(enemy);
-        enemy.ai = new MeleeAI(enemy);
+        // 파티 엔진 초기화 및 파티 생성
+        this.partyEngine = new PartyEngine(this);
+
+        // 플레이어 파티 생성
+        this.playerParty = this.partyEngine.createParty(
+            [UNITS.WARRIOR, UNITS.GUNNER, UNITS.MEDIC],
+            { x: 5, y: 15 }
+        );
+        this.player = this.playerParty[0];
+
+        // 적 파티는 플레이어에서 약간 떨어진 위치에 생성 (패쓰파인딩 테스트용)
+        const enemyBase = {
+            x: this.player.gridPosition.x + 8,
+            y: this.player.gridPosition.y
+        };
+        this.enemyParty = this.partyEngine.createParty(
+            [UNITS.WARRIOR, UNITS.GUNNER, UNITS.MEDIC],
+            enemyBase,
+            { label: '적' }
+        );
+        this.enemies = this.enemyParty;
+        this.enemyParty.forEach(enemy => {
+            enemy.ai = new MeleeAI(enemy);
+        });
 
         // 3. 입력 및 기타 설정
         this.input.keyboard.on('keydown', event => this.handleKeyPress(event));

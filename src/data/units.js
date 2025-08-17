@@ -12,5 +12,29 @@ export const UNITS = {
         defense: 5,       // 물리 방어력
         attackSpeed: 1000, // 1초에 한 번 공격
         speed: 200        // 이동 속도
+    },
+
+    GUNNER: {
+        key: 'unit_gunner',
+        name: '거너',
+        image: 'assets/images/unit/gunner.png',
+
+        hp: 80,
+        attack: 12,
+        defense: 3,
+        attackSpeed: 800,
+        speed: 220
+    },
+
+    MEDIC: {
+        key: 'unit_medic',
+        name: '메딕',
+        image: 'assets/images/unit/medic.png',
+
+        hp: 70,
+        attack: 5,
+        defense: 4,
+        attackSpeed: 900,
+        speed: 210
     }
 };
