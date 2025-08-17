@@ -1,6 +1,7 @@
 import { Physics } from 'phaser';
 import { Nameplate } from './Nameplate.js';
 import { SizingManager } from '../engine/SizingManager.js';
+import { CombatEngine } from '../engine/CombatEngine.js';
 
 export class Unit extends Physics.Arcade.Sprite {
     constructor(scene, gridX, gridY, unitData, name, options = {}) {
@@ -22,7 +23,7 @@ export class Unit extends Physics.Arcade.Sprite {
             SizingManager.TILE_SIZE * scale
         );
 
-        this.stats = { ...unitData };
+        this.stats = { ...unitData, maxHp: unitData.hp };
         this.nameplate = new Nameplate(scene, this, name);
         this.healthBar = scene.add.graphics();
         this.updateHealthBar();
@@ -37,8 +38,14 @@ export class Unit extends Physics.Arcade.Sprite {
         return new Promise(resolve => {
             if (action.type === 'move') {
                 this.moveToTile(action.targetPosition.x, action.targetPosition.y, resolve);
+            } else if (action.type === 'attack') {
+                const damage = CombatEngine.calculateDamage(this.stats, action.target.stats);
+                action.target.takeDamage(damage);
+                resolve();
+            } else if (action.type === 'heal') {
+                action.target.heal(this.stats.attack);
+                resolve();
             }
-            // 나중에 'attack' 등 다른 행동 타입 추가 가능
         });
     }
     
@@ -89,7 +96,7 @@ export class Unit extends Physics.Arcade.Sprite {
         this.healthBar.fillRect(
             -hbWidth / 2,
             0,
-            hbWidth * (this.stats.hp / 100),
+            hbWidth * (this.stats.hp / this.stats.maxHp),
             hbHeight
         );
     }
@@ -102,6 +109,16 @@ export class Unit extends Physics.Arcade.Sprite {
         console.log(`${this.nameplate.text} ${damage} 데미지, 체력: ${this.stats.hp}`);
         this.updateHealthBar();
         this.setTint(0xff0000);
+        this.scene.time.delayedCall(150, () => {
+            this.clearTint();
+        });
+    }
+
+    heal(amount) {
+        this.stats.hp = Math.min(this.stats.maxHp, this.stats.hp + amount);
+        console.log(`${this.nameplate.text} ${amount} 회복, 체력: ${this.stats.hp}`);
+        this.updateHealthBar();
+        this.setTint(0x00ff00);
         this.scene.time.delayedCall(150, () => {
             this.clearTint();
         });

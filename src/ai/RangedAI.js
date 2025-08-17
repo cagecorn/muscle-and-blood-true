@@ -1,10 +1,9 @@
-// AI가 행동을 결정하는 클래스
-export class MeleeAI {
+// 원거리 유닛이 거리를 유지하며 공격하는 AI
+export class RangedAI {
     constructor(owner) {
-        this.owner = owner; // 이 AI의 주인
+        this.owner = owner;
     }
 
-    // 어떤 행동을 할지 결정해서 반환
     decideAction(target) {
         const ownerPos = this.owner.gridPosition;
         const targetPos = target.gridPosition;
@@ -13,7 +12,7 @@ export class MeleeAI {
         const distance = Math.abs(dx) + Math.abs(dy);
         const range = this.owner.stats.range || 1;
 
-        if (distance <= range) {
+        if (distance === range) {
             return {
                 type: 'attack',
                 unit: this.owner,
@@ -24,10 +23,15 @@ export class MeleeAI {
         let nextX = ownerPos.x;
         let nextY = ownerPos.y;
 
-        if (dx < 0) nextX--;
-        else if (dx > 0) nextX++;
-        else if (dy < 0) nextY--;
-        else if (dy > 0) nextY++;
+        if (distance > range) {
+            if (dx < 0) nextX--;
+            else if (dx > 0) nextX++;
+            else if (dy < 0) nextY--;
+            else if (dy > 0) nextY++;
+        } else {
+            if (Math.abs(dx) > Math.abs(dy)) nextX -= Math.sign(dx);
+            else nextY -= Math.sign(dy);
+        }
 
         if (nextX !== ownerPos.x || nextY !== ownerPos.y) {
             return {
@@ -37,7 +41,6 @@ export class MeleeAI {
             };
         }
 
-        return null; // 움직일 필요가 없으면 아무 행동도 안함
+        return null;
     }
 }
-
