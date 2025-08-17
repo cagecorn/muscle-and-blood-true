@@ -40,6 +40,8 @@ export class Preloader extends Scene
         this.load.image('floor-tile', 'images/world-mab/floor-tile-1.png');
 
         this.load.image('unit_warrior', 'images/unit/warrior.png');
+        this.load.image('unit_gunner', 'images/unit/gunner.png');
+        this.load.image('unit_medic', 'images/unit/medic.png');
 
         // MapManager를 사용하여 맵 타일 에셋을 로드합니다.
         MapManager.preload(this);
