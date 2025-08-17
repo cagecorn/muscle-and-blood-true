@@ -7,8 +7,14 @@ class Room {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.centerX = x + Math.floor(width / 2);
-        this.centerY = y + Math.floor(height / 2);
+    }
+
+    get centerX() {
+        return this.x + Math.floor(this.width / 2);
+    }
+
+    get centerY() {
+        return this.y + Math.floor(this.height / 2);
     }
 
     // 다른 방과 겹치는지 확인하는 함수
@@ -66,6 +72,12 @@ export class DungeonManager {
                         this.rooms[i].y -= Math.round(moveY);
                         this.rooms[j].x += Math.round(moveX);
                         this.rooms[j].y += Math.round(moveY);
+
+                        // 맵 경계를 벗어나지 않도록 클램프
+                        this.rooms[i].x = Phaser.Math.Clamp(this.rooms[i].x, 1, this.width - this.rooms[i].width - 1);
+                        this.rooms[i].y = Phaser.Math.Clamp(this.rooms[i].y, 1, this.height - this.rooms[i].height - 1);
+                        this.rooms[j].x = Phaser.Math.Clamp(this.rooms[j].x, 1, this.width - this.rooms[j].width - 1);
+                        this.rooms[j].y = Phaser.Math.Clamp(this.rooms[j].y, 1, this.height - this.rooms[j].height - 1);
                     }
                 }
             }
@@ -89,56 +101,111 @@ export class DungeonManager {
     }
 
     connectRooms() {
-        // 모든 방을 그들의 가장 가까운 2개의 방과 연결 (간단한 델로니 근사)
+        // 모든 방 쌍 사이의 거리 계산 (간단한 델로니 근사 대신 전체 그래프)
         const edges = [];
         for (let i = 0; i < this.rooms.length; i++) {
-            const roomA = this.rooms[i];
-            let closest = [];
-            for (let j = 0; j < this.rooms.length; j++) {
-                if (i === j) continue;
+            for (let j = i + 1; j < this.rooms.length; j++) {
+                const roomA = this.rooms[i];
                 const roomB = this.rooms[j];
                 const dist = Phaser.Math.Distance.Between(roomA.centerX, roomA.centerY, roomB.centerX, roomB.centerY);
-                closest.push({ room: roomB, dist: dist });
-            }
-            closest.sort((a, b) => a.dist - b.dist);
-
-            // 가장 가까운 두 방과 연결
-            for (let k = 0; k < 2 && k < closest.length; k++) {
-                edges.push({ start: roomA, end: closest[k].room, weight: closest[k].dist });
+                edges.push({ roomA, roomB, weight: dist });
             }
         }
 
-        // MST(최소 신장 트리)를 통해 모든 방이 연결되도록 보장 (Prim's 알고리즘의 간단한 버전)
+        // Prim's 알고리즘을 사용한 최소 신장 트리로 기본 연결 확보
         const connected = new Set([this.rooms[0]]);
         const mstEdges = [];
         while (connected.size < this.rooms.length) {
             let bestEdge = null;
             for (const edge of edges) {
-                if (connected.has(edge.start) && !connected.has(edge.end)) {
-                    if (bestEdge === null || edge.weight < bestEdge.weight) {
+                const aConnected = connected.has(edge.roomA);
+                const bConnected = connected.has(edge.roomB);
+                if (aConnected && !bConnected || bConnected && !aConnected) {
+                    if (!bestEdge || edge.weight < bestEdge.weight) {
                         bestEdge = edge;
                     }
                 }
             }
             if (bestEdge) {
                 mstEdges.push(bestEdge);
-                connected.add(bestEdge.end);
+                connected.add(bestEdge.roomA);
+                connected.add(bestEdge.roomB);
             } else {
                 break; // 더 이상 연결할 수 없는 경우
             }
         }
 
-        // 15% 확률로 원래 엣지를 추가하여 루프 생성
+        // 추가 간선을 일부 선택하여 루프 생성
         edges.forEach(edge => {
-            if (Phaser.Math.FloatBetween(0, 1) < 0.15) {
+            if (!mstEdges.includes(edge) && Phaser.Math.FloatBetween(0, 1) < 0.3) {
                 mstEdges.push(edge);
             }
         });
-        
+
         // 선택된 엣지들을 기반으로 터널 파기
         mstEdges.forEach(edge => {
-            this.createTunnel(edge.start, edge.end);
+            this.createTunnel(edge.roomA, edge.roomB);
         });
+
+        // 최종적으로 모든 방이 연결되었는지 확인하고 누락된 방을 보완
+        this.ensureConnectivity();
+    }
+
+    ensureConnectivity() {
+        const visited = Array(this.width).fill(null).map(() => Array(this.height).fill(false));
+        const queue = [];
+        const start = { x: this.rooms[0].centerX, y: this.rooms[0].centerY };
+        queue.push(start);
+        visited[start.x][start.y] = true;
+        const dirs = [
+            { x: 1, y: 0 },
+            { x: -1, y: 0 },
+            { x: 0, y: 1 },
+            { x: 0, y: -1 }
+        ];
+
+        while (queue.length > 0) {
+            const { x, y } = queue.shift();
+            for (const dir of dirs) {
+                const nx = x + dir.x;
+                const ny = y + dir.y;
+                if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                    if (this.tiles[nx][ny] === 0 && !visited[nx][ny]) {
+                        visited[nx][ny] = true;
+                        queue.push({ x: nx, y: ny });
+                    }
+                }
+            }
+        }
+
+        // 방문하지 못한 방이 있다면 가장 가까운 방문 지점과 연결
+        let allConnected = true;
+        for (const room of this.rooms) {
+            if (!visited[room.centerX][room.centerY]) {
+                allConnected = false;
+                let target = null;
+                let bestDist = Infinity;
+                for (let x = 0; x < this.width; x++) {
+                    for (let y = 0; y < this.height; y++) {
+                        if (visited[x][y] && this.tiles[x][y] === 0) {
+                            const dist = Phaser.Math.Distance.Between(room.centerX, room.centerY, x, y);
+                            if (dist < bestDist) {
+                                bestDist = dist;
+                                target = { centerX: x, centerY: y };
+                            }
+                        }
+                    }
+                }
+                if (target) {
+                    this.createTunnel(room, target);
+                }
+            }
+        }
+
+        // 새로 연결한 방이 있다면 다시 확인
+        if (!allConnected) {
+            this.ensureConnectivity();
+        }
     }
 
     createTunnel(roomA, roomB) {
