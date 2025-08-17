@@ -4,6 +4,8 @@ import { DungeonManager } from '../../engine/DungeonManager.js';
 import { SizingManager } from '../../engine/SizingManager.js';
 import { Nameplate } from '../Nameplate.js';
 import { HealthBar } from '../HealthBar.js';
+import { WorldEntity } from '../WorldEntity.js';
+import { WorldEnemy } from '../WorldEnemy.js';
 
 export class WorldMap extends Scene
 {
@@ -19,6 +21,8 @@ export class WorldMap extends Scene
         this.targetY = null;
         this.nameplates = [];
         this.healthBars = [];
+        this.enemies = [];
+        this.playerEntity = null;
     }
 
     create ()
@@ -80,6 +84,9 @@ export class WorldMap extends Scene
             });
 
             this.commander = party;
+            this.playerEntity = new WorldEntity(this, party, this.tileSize);
+
+            this.spawnEnemies();
 
             // 부드러운 카메라 이동 및 확대 설정
             this.cameras.main.startFollow(this.commander, true, 0.08, 0.08);
@@ -123,9 +130,38 @@ export class WorldMap extends Scene
         });
     }
 
+    spawnEnemies() {
+        const playerPos = this.playerEntity.getGridPosition();
+        const configs = [
+            { dx: 5, dy: 0, key: 'unit_warrior', name: '적 워리어' },
+            { dx: 5, dy: 1, key: 'unit_gunner', name: '적 거너' },
+            { dx: 5, dy: -1, key: 'unit_medic', name: '적 메딕' }
+        ];
+        configs.forEach(cfg => {
+            const x = playerPos.x + cfg.dx;
+            const y = playerPos.y + cfg.dy;
+            if (this.dungeonManager.getTileAt(x, y) === 0) {
+                const enemy = new WorldEnemy(this, x, y, cfg.key, cfg.name, this.tileSize);
+                this.enemies.push(enemy);
+                this.nameplates.push(enemy.nameplate);
+                this.healthBars.push(enemy.healthBar);
+            }
+        });
+    }
+
+    processEnemyTurn() {
+        this.enemies.forEach(enemy => {
+            const action = enemy.ai.decideAction(this.playerEntity);
+            if (action && action.type === 'move') {
+                enemy.moveToTile(action.targetPosition.x, action.targetPosition.y);
+            }
+        });
+    }
+
     update(time, delta) {
         this.nameplates.forEach(np => np.update());
         this.healthBars.forEach(hb => hb.update());
+        this.enemies.forEach(e => e.update());
 
         if (!this.commander || !this.cursors || this.isMoving) {
             return;
@@ -166,6 +202,7 @@ export class WorldMap extends Scene
                     onComplete: () => {
                         this.isMoving = false;
                         this.commander.setPosition(this.targetX, this.targetY);
+                        this.processEnemyTurn();
                     }
                 });
             }
